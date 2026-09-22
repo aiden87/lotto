@@ -159,12 +159,34 @@
 
   .stage-head {
     display: flex;
-    align-items: baseline;
+    align-items: center;
     justify-content: space-between;
     gap: 12px;
-    padding: 0 4px;
-    margin-bottom: 10px;
+    padding: 8px;
+    margin: 0 -8px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    user-select: none;
   }
+  .stage-head:hover { background: var(--pending-bg); }
+
+  .stage-head-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+  }
+
+  .chevron {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    color: var(--muted);
+    display: inline-block;
+    flex: none;
+    transform: rotate(90deg);
+    transition: transform 0.2s ease;
+  }
+  .stage.collapsed .chevron { transform: rotate(0deg); }
 
   .stage-head h2 {
     font-family: var(--font-display);
@@ -176,10 +198,16 @@
   .stage-tag {
     font-family: var(--font-mono);
     font-size: 10px;
-    letter-spacing: 0.1em;
+    font-weight: 600;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--muted);
+    color: var(--accent-ink);
+    background: var(--accent);
+    padding: 2px 7px;
+    border-radius: 3px;
   }
+
+  .stage.collapsed .panel { display: none; }
 
   .stage-count {
     font-family: var(--font-mono);
@@ -314,7 +342,7 @@
   <header class="manifest">
     <div class="eyebrow">Infra Manifest · No.01</div>
     <h1>Launch Checklist</h1>
-    <p class="subtitle">lotto app — 정적 데모에서 결제까지, 스택별 셋업 순서 · 서비스 버튼을 누르면 사이트로 이동하고 선택 상태로 기록됩니다</p>
+    <p class="subtitle">테크노바 app — 정적 데모에서 결제까지, 스택별 셋업 순서 · 서비스 버튼을 누르면 사이트로 이동하고 선택 상태로 기록됩니다</p>
     <div class="progress-row">
       <span id="progressLabel">STAGE 1 OF 5</span>
       <span class="progress-count"><strong id="progressCount">0</strong> / <span id="progressTotal">0</span> complete</span>
@@ -449,6 +477,7 @@
   var state = loadState();
   if (!state.checked) state.checked = {};
   if (!state.selected) state.selected = {};
+  if (!state.collapsed) state.collapsed = {};
 
   var stagesEl = document.getElementById("stages");
   var allCheckboxes = [];
@@ -458,15 +487,41 @@
     var section = document.createElement("section");
     section.className = "stage";
 
+    var stageId = "s" + stageIndex;
+    var isCollapsed = !!state.collapsed[stageId];
+    if (isCollapsed) section.classList.add("collapsed");
+
     var head = document.createElement("div");
     head.className = "stage-head";
+    head.setAttribute("role", "button");
+    head.setAttribute("tabindex", "0");
+    head.setAttribute("aria-expanded", String(!isCollapsed));
     head.innerHTML =
-      '<h2><span class="stage-tag">' + stage.tag + '</span> &nbsp;' + stage.name + '</h2>' +
+      '<span class="stage-head-left">' +
+        '<span class="chevron">&rsaquo;</span>' +
+        '<h2><span class="stage-tag">' + stage.tag + '</span> &nbsp;' + stage.name + '</h2>' +
+      '</span>' +
       '<span class="stage-count" id="stageCount' + stageIndex + '"></span>';
     section.appendChild(head);
 
     var panel = document.createElement("div");
     panel.className = "panel";
+    panel.hidden = isCollapsed;
+
+    function toggleStage() {
+      var collapsed = section.classList.toggle("collapsed");
+      panel.hidden = collapsed;
+      head.setAttribute("aria-expanded", String(!collapsed));
+      state.collapsed[stageId] = collapsed;
+      saveState(state);
+    }
+    head.addEventListener("click", toggleStage);
+    head.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        toggleStage();
+      }
+    });
 
     stage.items.forEach(function (item) {
       var row = document.createElement("div");
