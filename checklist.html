@@ -1,0 +1,616 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Launch Checklist</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;600;700&family=Public+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root {
+    color-scheme: light dark;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+
+    --bg: #eef1f6;
+    --surface: #ffffff;
+    --ink: #17233f;
+    --muted: #55607a;
+    --line: #c7d0e0;
+    --line-strong: #a9b6cd;
+    --accent: #b1531f;
+    --accent-ink: #ffffff;
+    --done: #2f7d5c;
+    --done-bg: #e3f1ea;
+    --later: #8a6d1f;
+    --later-bg: #f5eed9;
+    --pending: #6b7690;
+    --pending-bg: #e7eaf1;
+    --font-display: "Zilla Slab", "Noto Serif KR", ui-serif, serif;
+    --font-body: "Public Sans", "Malgun Gothic", ui-sans-serif, sans-serif;
+    --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #142a4f;
+      --surface: #1b355e;
+      --ink: #eef4ff;
+      --muted: #a8bede;
+      --line: rgba(255,255,255,0.18);
+      --line-strong: rgba(255,255,255,0.3);
+      --accent: #ff9f5b;
+      --accent-ink: #17233f;
+      --done: #6fe3b4;
+      --done-bg: rgba(111,227,180,0.14);
+      --later: #ffd36e;
+      --later-bg: rgba(255,211,110,0.14);
+      --pending: #93a8c9;
+      --pending-bg: rgba(147,168,201,0.14);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #142a4f;
+    --surface: #1b355e;
+    --ink: #eef4ff;
+    --muted: #a8bede;
+    --line: rgba(255,255,255,0.18);
+    --line-strong: rgba(255,255,255,0.3);
+    --accent: #ff9f5b;
+    --accent-ink: #17233f;
+    --done: #6fe3b4;
+    --done-bg: rgba(111,227,180,0.14);
+    --later: #ffd36e;
+    --later-bg: rgba(255,211,110,0.14);
+    --pending: #93a8c9;
+    --pending-bg: rgba(147,168,201,0.14);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--bg);
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size: 28px 28px;
+    background-attachment: local;
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 15px;
+    line-height: 1.55;
+    padding: 40px 16px 64px;
+    display: flex;
+    justify-content: center;
+  }
+
+  main {
+    width: 100%;
+    max-width: 780px;
+  }
+
+  header.manifest {
+    background: var(--surface);
+    border: 1px solid var(--line-strong);
+    border-radius: 4px;
+    padding: 28px 28px 24px;
+    margin-bottom: 28px;
+  }
+
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  h1 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(28px, 5vw, 38px);
+    margin: 6px 0 4px;
+    text-wrap: balance;
+    letter-spacing: -0.01em;
+  }
+
+  .subtitle {
+    color: var(--muted);
+    font-size: 14px;
+    margin: 0 0 22px;
+  }
+
+  .progress-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  .progress-count strong {
+    color: var(--ink);
+    font-size: 13px;
+  }
+
+  .progress-track {
+    height: 8px;
+    border-radius: 4px;
+    background: var(--pending-bg);
+    overflow: hidden;
+    border: 1px solid var(--line);
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    width: 0%;
+    transition: width 0.3s ease;
+  }
+
+  section.stage {
+    margin-bottom: 22px;
+  }
+
+  .stage-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 0 4px;
+    margin-bottom: 10px;
+  }
+
+  .stage-head h2 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 17px;
+    margin: 0;
+  }
+
+  .stage-tag {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .stage-count {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--line-strong);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .item {
+    display: grid;
+    grid-template-columns: 26px 1fr;
+    align-items: start;
+    gap: 2px 14px;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--line);
+  }
+  .item:last-child { border-bottom: none; }
+
+  .item input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    margin-top: 2px;
+    accent-color: var(--accent);
+    cursor: pointer;
+  }
+
+  .item-content { min-width: 0; }
+
+  .name-row {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .item-name {
+    font-weight: 600;
+    font-size: 14.5px;
+  }
+
+  .item.done .item-name {
+    color: var(--muted);
+    text-decoration: line-through;
+    text-decoration-color: var(--line-strong);
+  }
+
+  .selected-tag {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+
+  .item-note {
+    color: var(--muted);
+    font-size: 12.5px;
+    margin-top: 3px;
+  }
+
+  .options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .option-btn {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    padding: 5px 10px;
+    border-radius: 3px;
+    border: 1px solid var(--line-strong);
+    color: var(--ink);
+    text-decoration: none;
+    background: var(--pending-bg);
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    line-height: 1.3;
+  }
+  .option-btn:hover { border-color: var(--ink); }
+
+  .option-btn.selected {
+    background: var(--accent);
+    color: var(--accent-ink);
+    border-color: var(--accent);
+    font-weight: 600;
+  }
+
+  .option-btn .arrow { font-size: 11px; opacity: 0.7; }
+
+  footer {
+    margin-top: 28px;
+    padding: 0 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  footer button {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    background: none;
+    border: 1px solid var(--line-strong);
+    color: var(--muted);
+    border-radius: 3px;
+    padding: 6px 10px;
+    cursor: pointer;
+  }
+  footer button:hover { color: var(--ink); border-color: var(--ink); }
+
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .progress-fill { transition: none; }
+  }
+</style>
+</head>
+<body>
+<main>
+
+  <header class="manifest">
+    <div class="eyebrow">Infra Manifest · No.01</div>
+    <h1>Launch Checklist</h1>
+    <p class="subtitle">lotto app — 정적 데모에서 결제까지, 스택별 셋업 순서 · 서비스 버튼을 누르면 사이트로 이동하고 선택 상태로 기록됩니다</p>
+    <div class="progress-row">
+      <span id="progressLabel">STAGE 1 OF 5</span>
+      <span class="progress-count"><strong id="progressCount">0</strong> / <span id="progressTotal">0</span> complete</span>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+  </header>
+
+  <div id="stages"></div>
+
+  <footer>
+    <span>브라우저(localStorage)에만 저장됨 · 이 기기에서만 유지</span>
+    <button id="resetBtn" type="button">전체 초기화</button>
+  </footer>
+
+</main>
+
+<script>
+(function () {
+  "use strict";
+
+  var DATA = [
+    {
+      tag: "STAGE 1",
+      name: "코어 스택 — 지금 단계",
+      items: [
+        { id: "src-github", name: "소스관리", note: "private repo 1개로 시작, 나중에 frontend/backend 폴더 분리",
+          options: [{ label: "GitHub", url: "https://github.com" }] },
+        { id: "cicd-actions", name: "CI/CD 자동화", note: "push 시 자동 빌드·배포 트리거",
+          options: [{ label: "GitHub Actions", url: "https://github.com/features/actions" }] },
+        { id: "fe-pages", name: "프론트엔드 호스팅", note: "정적 파일 전용, 서버 실행 불가",
+          options: [
+            { label: "GitHub Pages", url: "https://pages.github.com" },
+            { label: "Vercel", url: "https://vercel.com" },
+            { label: "Netlify", url: "https://www.netlify.com" }
+          ] },
+        { id: "be-render", name: "백엔드 서버", note: "Spring Boot 배포, 무료 티어는 미사용 시 슬립",
+          options: [
+            { label: "Render", url: "https://render.com" },
+            { label: "Railway", url: "https://railway.app" },
+            { label: "Fly.io", url: "https://fly.io" },
+            { label: "AWS Lightsail", url: "https://aws.amazon.com/lightsail/" }
+          ] },
+        { id: "db", name: "데이터베이스", note: "무료 티어 기준 비교 후 선택",
+          options: [
+            { label: "Supabase (Postgres)", url: "https://supabase.com" },
+            { label: "Neon (Postgres)", url: "https://neon.tech" },
+            { label: "PlanetScale (MySQL)", url: "https://planetscale.com" }
+          ] },
+        { id: "domain-buy", name: "도메인 구매", note: ".com 기준 연 1만~2만원대",
+          options: [
+            { label: "후이즈", url: "https://whois.co.kr" },
+            { label: "Namecheap", url: "https://www.namecheap.com" }
+          ] },
+        { id: "dns-cloudflare", name: "DNS · HTTPS", note: "무료 SSL 자동 발급·갱신, api. 서브도메인 분리 가능",
+          options: [{ label: "Cloudflare", url: "https://www.cloudflare.com" }] }
+      ]
+    },
+    {
+      tag: "STAGE 2",
+      name: "결제 시스템 — 추후",
+      items: [
+        { id: "pg", name: "PG(결제대행) 연동", note: "테스트 모드로 먼저 연동 확인",
+          options: [
+            { label: "포트원", url: "https://portone.io" },
+            { label: "토스페이먼츠", url: "https://www.tosspayments.com" }
+          ] },
+        { id: "biz-register", name: "사업자등록 + 통신판매업 신고", note: "PG사 심사 전 필수",
+          options: [{ label: "정부24", url: "https://www.gov.kr" }] },
+        { id: "settle-account", name: "정산 계좌 개설", note: "PG사에 등록할 사업자 명의 계좌 — 은행별 안내 참고", options: [] },
+        { id: "legal-pages", name: "이용약관 · 개인정보처리방침", note: "전자상거래법상 결제 화면에 링크 필수",
+          options: [{ label: "개인정보보호위원회", url: "https://www.privacy.go.kr" }] }
+      ]
+    },
+    {
+      tag: "STAGE 3",
+      name: "본인인증 — 추후",
+      items: [
+        { id: "auth", name: "본인인증 API", note: "PASS·카카오·네이버 인증서 한번에 연동",
+          options: [{ label: "포트원 통합인증", url: "https://portone.io" }] }
+      ]
+    },
+    {
+      tag: "STAGE 4",
+      name: "외부 API 연동 — 추후",
+      items: [
+        { id: "api-kis", name: "국내 주식 시세", note: "무료, 증권 계좌 연결 필요",
+          options: [{ label: "한국투자증권 Open API", url: "https://apiportal.koreainvestment.com" }] },
+        { id: "api-global", name: "해외 주식 시세", note: "무료 티어는 요청 빈도 제한 있음",
+          options: [
+            { label: "Alpha Vantage", url: "https://www.alphavantage.co" },
+            { label: "Finnhub", url: "https://finnhub.io" }
+          ] },
+        { id: "api-key-guard", name: "API 키 보안", note: "키는 백엔드에만 저장, 프론트엔드 노출 금지", options: [] }
+      ]
+    },
+    {
+      tag: "STAGE 5",
+      name: "운영 · 보안 — 선택",
+      items: [
+        { id: "ops-uptime", name: "가동 모니터링", note: "무료, 5분 간격 헬스체크",
+          options: [{ label: "UptimeRobot", url: "https://uptimerobot.com" }] },
+        { id: "ops-sentry", name: "에러 트래킹", note: "무료 티어 월 5천 이벤트",
+          options: [{ label: "Sentry", url: "https://sentry.io" }] },
+        { id: "ops-secrets", name: "환경변수 · 시크릿 관리", note: "DB 비밀번호·API 키를 코드에 직접 넣지 않음",
+          options: [
+            { label: "GitHub Secrets", url: "https://docs.github.com/actions/security-guides/using-secrets-in-github-actions" },
+            { label: "Render Env", url: "https://render.com/docs/environment-variables" }
+          ] }
+      ]
+    }
+  ];
+
+  var STORAGE_KEY = "launch-checklist-v2";
+
+  function loadState() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : { checked: {}, selected: {} };
+    } catch (e) {
+      return { checked: {}, selected: {} };
+    }
+  }
+
+  function saveState(state) {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch (e) {
+      /* private mode or storage blocked — state just won't persist */
+    }
+  }
+
+  var state = loadState();
+  if (!state.checked) state.checked = {};
+  if (!state.selected) state.selected = {};
+
+  var stagesEl = document.getElementById("stages");
+  var allCheckboxes = [];
+  var stageCounters = [];
+
+  DATA.forEach(function (stage, stageIndex) {
+    var section = document.createElement("section");
+    section.className = "stage";
+
+    var head = document.createElement("div");
+    head.className = "stage-head";
+    head.innerHTML =
+      '<h2><span class="stage-tag">' + stage.tag + '</span> &nbsp;' + stage.name + '</h2>' +
+      '<span class="stage-count" id="stageCount' + stageIndex + '"></span>';
+    section.appendChild(head);
+
+    var panel = document.createElement("div");
+    panel.className = "panel";
+
+    stage.items.forEach(function (item) {
+      var row = document.createElement("div");
+      row.className = "item";
+      row.id = "row-" + item.id;
+
+      var cb = document.createElement("input");
+      cb.type = "checkbox";
+      cb.id = "cb-" + item.id;
+      cb.checked = !!state.checked[item.id];
+
+      var content = document.createElement("div");
+      content.className = "item-content";
+
+      var nameRow = document.createElement("div");
+      nameRow.className = "name-row";
+
+      var nameLabel = document.createElement("label");
+      nameLabel.setAttribute("for", cb.id);
+      nameLabel.className = "item-name";
+      nameLabel.textContent = item.name;
+      nameRow.appendChild(nameLabel);
+
+      var selectedTag = document.createElement("span");
+      selectedTag.className = "selected-tag";
+      nameRow.appendChild(selectedTag);
+
+      content.appendChild(nameRow);
+
+      if (item.note) {
+        var note = document.createElement("div");
+        note.className = "item-note";
+        note.textContent = item.note;
+        content.appendChild(note);
+      }
+
+      function refreshSelectedTag() {
+        var sel = state.selected[item.id];
+        selectedTag.textContent = sel ? "선택됨 · " + sel : "";
+      }
+      refreshSelectedTag();
+
+      if (item.options && item.options.length) {
+        var options = document.createElement("div");
+        options.className = "options";
+
+        item.options.forEach(function (opt) {
+          var a = document.createElement("a");
+          a.href = opt.url;
+          a.target = "_blank";
+          a.rel = "noopener noreferrer";
+          a.className = "option-btn";
+          if (state.selected[item.id] === opt.label) a.classList.add("selected");
+          a.innerHTML = '<span>' + opt.label + '</span><span class="arrow">↗</span>';
+
+          a.addEventListener("click", function () {
+            var current = state.selected[item.id];
+            state.selected[item.id] = (current === opt.label) ? undefined : opt.label;
+            if (state.selected[item.id] === undefined) delete state.selected[item.id];
+            saveState(state);
+            options.querySelectorAll(".option-btn").forEach(function (btn) {
+              btn.classList.remove("selected");
+            });
+            if (state.selected[item.id] === opt.label) a.classList.add("selected");
+            refreshSelectedTag();
+          });
+
+          options.appendChild(a);
+        });
+
+        content.appendChild(options);
+      }
+
+      row.appendChild(cb);
+      row.appendChild(content);
+
+      function applyDoneClass() {
+        row.classList.toggle("done", cb.checked);
+      }
+      applyDoneClass();
+
+      cb.addEventListener("change", function () {
+        state.checked[item.id] = cb.checked;
+        saveState(state);
+        applyDoneClass();
+        updateProgress();
+      });
+
+      allCheckboxes.push({ id: item.id, stageIndex: stageIndex, el: cb });
+      panel.appendChild(row);
+    });
+
+    section.appendChild(panel);
+    stagesEl.appendChild(section);
+    stageCounters.push({ el: document.getElementById("stageCount" + stageIndex), total: stage.items.length });
+  });
+
+  var progressFill = document.getElementById("progressFill");
+  var progressCount = document.getElementById("progressCount");
+  var progressTotal = document.getElementById("progressTotal");
+  var progressLabel = document.getElementById("progressLabel");
+
+  function updateProgress() {
+    var total = allCheckboxes.length;
+    var done = allCheckboxes.filter(function (c) { return c.el.checked; }).length;
+
+    progressCount.textContent = done;
+    progressTotal.textContent = total;
+    progressFill.style.width = (total ? (done / total * 100) : 0) + "%";
+
+    var perStage = DATA.map(function (_, i) {
+      return allCheckboxes.filter(function (c) { return c.stageIndex === i; });
+    });
+    perStage.forEach(function (list, i) {
+      var d = list.filter(function (c) { return c.el.checked; }).length;
+      stageCounters[i].el.textContent = d + " / " + list.length;
+    });
+
+    var currentStage = perStage.findIndex(function (list) {
+      return list.some(function (c) { return !c.el.checked; });
+    });
+    if (currentStage === -1) currentStage = DATA.length - 1;
+    progressLabel.textContent = "STAGE " + (currentStage + 1) + " OF " + DATA.length;
+  }
+
+  updateProgress();
+
+  document.getElementById("resetBtn").addEventListener("click", function () {
+    if (!confirm("모든 체크와 선택을 초기화할까요?")) return;
+    allCheckboxes.forEach(function (c) {
+      c.el.checked = false;
+      document.getElementById("row-" + c.id).classList.remove("done");
+    });
+    state = { checked: {}, selected: {} };
+    saveState(state);
+    updateProgress();
+    document.querySelectorAll(".option-btn.selected").forEach(function (btn) {
+      btn.classList.remove("selected");
+    });
+    document.querySelectorAll(".selected-tag").forEach(function (tag) {
+      tag.textContent = "";
+    });
+  });
+})();
+</script>
+</body>
+</html>
