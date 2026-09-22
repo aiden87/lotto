@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>로또 번호 생성기</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --card: #1e293b;
+    --text: #f1f5f9;
+    --muted: #94a3b8;
+    --accent: #6366f1;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: linear-gradient(160deg, #0f172a, #1e1b4b);
+    color: var(--text);
+    font-family: "Segoe UI", "Malgun Gothic", sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 32px 16px 60px;
+  }
+  h1 {
+    font-size: 28px;
+    margin: 8px 0 4px;
+    letter-spacing: -0.5px;
+  }
+  .subtitle {
+    color: var(--muted);
+    font-size: 14px;
+    margin-bottom: 28px;
+    text-align: center;
+  }
+  .controls {
+    display: flex;
+    align-items: flex-end;
+    gap: 20px;
+    background: var(--card);
+    padding: 16px 22px;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.35);
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: flex-start;
+  }
+  .controls label {
+    font-size: 13px;
+    color: var(--muted);
+  }
+  select {
+    background: #0f172a;
+    color: var(--text);
+    border: 1px solid #334155;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+  button#drawBtn {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: white;
+    border: none;
+    padding: 12px 28px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    box-shadow: 0 4px 14px rgba(99,102,241,0.4);
+  }
+  button#drawBtn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(99,102,241,0.55);
+  }
+  button#drawBtn:active {
+    transform: translateY(0);
+  }
+  button#drawBtn:disabled {
+    opacity: 0.6;
+    cursor: default;
+    transform: none;
+  }
+
+  .fixed-inputs {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 16px;
+  }
+  .fixed-input {
+    width: 60px;
+    padding: 8px 6px;
+    border-radius: 8px;
+    border: 1px solid #334155;
+    background: #0f172a;
+    color: var(--text);
+    text-align: center;
+    font-size: 14px;
+  }
+  .fixed-input::-webkit-inner-spin-button,
+  .fixed-input::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  .error-text {
+    color: #f87171;
+    font-size: 13px;
+    margin-top: 10px;
+    text-align: center;
+  }
+
+  #results {
+    width: 100%;
+    max-width: 640px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-top: 28px;
+  }
+  .set-row {
+    background: var(--card);
+    border-radius: 14px;
+    padding: 16px 18px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.25);
+    opacity: 0;
+    transform: translateY(8px);
+    animation: fadeIn 0.4s ease forwards;
+  }
+  .set-label {
+    font-size: 13px;
+    color: var(--muted);
+    min-width: 44px;
+    font-weight: 600;
+  }
+  .balls {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .ball-wrapper {
+    position: relative;
+  }
+  .ball {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 15px;
+    color: #1a1a1a;
+    box-shadow: inset 0 -3px 4px rgba(0,0,0,0.2), 0 2px 4px rgba(0,0,0,0.3);
+  }
+  .ball.yellow { background: #fbc400; }
+  .ball.blue   { background: #69c8f2; color: #0b2e3d; }
+  .ball.red    { background: #ff7272; color: #4a0000; }
+  .ball.gray   { background: #aaaaaa; color: #222; }
+  .ball.green  { background: #b0d840; color: #1a2e00; }
+
+  .del-btn {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: none;
+    background: #ef4444;
+    color: white;
+    font-size: 12px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: opacity 0.15s ease, transform 0.15s ease;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+  }
+  .ball-wrapper:hover .del-btn {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  .ball-input {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px dashed var(--accent);
+    background: #0f172a;
+    color: var(--text);
+    text-align: center;
+    font-weight: 700;
+    font-size: 15px;
+    padding: 0;
+  }
+  .ball-input:focus {
+    outline: none;
+    border-color: #a5b4fc;
+  }
+  .ball-input::-webkit-inner-spin-button,
+  .ball-input::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  .shake {
+    animation: shakeAnim 0.3s;
+    border-color: #ef4444 !important;
+  }
+  @keyframes shakeAnim {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-4px); }
+    75% { transform: translateX(4px); }
+  }
+
+  @keyframes fadeIn {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .empty-hint {
+    color: var(--muted);
+    font-size: 14px;
+    text-align: center;
+    margin-top: 12px;
+  }
+
+  footer {
+    margin-top: 40px;
+    font-size: 12px;
+    color: #475569;
+  }
+</style>
+</head>
+<body>
+
+  <h1>🎱 로또 번호 생성기</h1>
+  <div class="subtitle">버튼 한 번으로 1~5세트의 로또 번호를 랜덤으로 뽑아드립니다.</div>
+
+  <div class="controls">
+    <div class="control-group">
+      <label for="setCount">세트 수</label>
+      <select id="setCount">
+        <option value="1">1세트</option>
+        <option value="2">2세트</option>
+        <option value="3">3세트</option>
+        <option value="4">4세트</option>
+        <option value="5" selected>5세트</option>
+      </select>
+    </div>
+    <div class="control-group">
+      <label for="fixedCount">고정 숫자 개수</label>
+      <select id="fixedCount">
+        <option value="0" selected>0개</option>
+        <option value="1">1개</option>
+        <option value="2">2개</option>
+        <option value="3">3개</option>
+        <option value="4">4개</option>
+        <option value="5">5개</option>
+        <option value="6">6개</option>
+      </select>
+    </div>
+    <button id="drawBtn">번호 뽑기</button>
+  </div>
+
+  <div id="fixedInputsRow" class="fixed-inputs" hidden></div>
+  <div id="fixedError" class="error-text" hidden></div>
+
+  <div id="results"></div>
+  <div class="empty-hint" id="hint">세트 수를 선택하고 버튼을 눌러보세요.</div>
+
+  <footer>
+    1~45 중 서로 다른 6개 숫자를 오름차순으로 뽑습니다. 뽑힌 숫자에 마우스를 올리면 우측 위 × 버튼으로 삭제하고 직접 입력할 수 있습니다.
+  </footer>
+
+<script>
+  const drawBtn = document.getElementById('drawBtn');
+  const setCountSelect = document.getElementById('setCount');
+  const fixedCountSelect = document.getElementById('fixedCount');
+  const fixedInputsRow = document.getElementById('fixedInputsRow');
+  const fixedError = document.getElementById('fixedError');
+  const resultsEl = document.getElementById('results');
+  const hintEl = document.getElementById('hint');
+
+  // appState.sets: array of sets, each set is an array of 6 entries (number or null when being edited)
+  const appState = { sets: [] };
+
+  function ballColor(n) {
+    if (n <= 10) return 'yellow';
+    if (n <= 20) return 'blue';
+    if (n <= 30) return 'red';
+    if (n <= 40) return 'gray';
+    return 'green';
+  }
+
+  // ---- 고정 숫자 입력칸 구성 ----
+  function renderFixedInputs() {
+    const count = parseInt(fixedCountSelect.value, 10);
+    fixedInputsRow.innerHTML = '';
+    fixedInputsRow.hidden = count === 0;
+    for (let i = 0; i < count; i++) {
+      const input = document.createElement('input');
+      input.type = 'number';
+      input.min = '1';
+      input.max = '45';
+      input.className = 'fixed-input';
+      input.placeholder = `고정 ${i + 1}`;
+      fixedInputsRow.appendChild(input);
+    }
+  }
+  fixedCountSelect.addEventListener('change', renderFixedInputs);
+  renderFixedInputs();
+
+  function readFixedNumbers() {
+    const inputs = Array.from(document.querySelectorAll('.fixed-input'));
+    if (inputs.length === 0) return { ok: true, numbers: [] };
+    const numbers = [];
+    for (const inp of inputs) {
+      const raw = inp.value.trim();
+      if (raw === '') return { ok: false, message: '고정 숫자를 모두 입력해주세요.' };
+      const n = parseInt(raw, 10);
+      if (!Number.isInteger(n) || n < 1 || n > 45) {
+        return { ok: false, message: '고정 숫자는 1~45 사이여야 합니다.' };
+      }
+      if (numbers.includes(n)) {
+        return { ok: false, message: '고정 숫자가 중복되었습니다.' };
+      }
+      numbers.push(n);
+    }
+    return { ok: true, numbers };
+  }
+
+  // ---- 번호 뽑기 ----
+  function drawOneSet(fixedNumbers) {
+    const chosen = new Set(fixedNumbers);
+    const pool = [];
+    for (let i = 1; i <= 45; i++) {
+      if (!chosen.has(i)) pool.push(i);
+    }
+    while (chosen.size < 6) {
+      const idx = Math.floor(Math.random() * pool.length);
+      chosen.add(pool.splice(idx, 1)[0]);
+    }
+    return Array.from(chosen).sort((a, b) => a - b);
+  }
+
+  drawBtn.addEventListener('click', () => {
+    fixedError.hidden = true;
+    const fixedResult = readFixedNumbers();
+    if (!fixedResult.ok) {
+      fixedError.textContent = fixedResult.message;
+      fixedError.hidden = false;
+      return;
+    }
+    const count = parseInt(setCountSelect.value, 10);
+    hintEl.style.display = 'none';
+    appState.sets = Array.from({ length: count }, () => drawOneSet(fixedResult.numbers));
+    renderResults();
+  });
+
+  // ---- 결과 렌더링 (삭제 후 직접 입력 지원) ----
+  function renderResults() {
+    resultsEl.innerHTML = '';
+    appState.sets.forEach((numbers, si) => {
+      const row = document.createElement('div');
+      row.className = 'set-row';
+      row.style.animationDelay = (si * 0.08) + 's';
+
+      const label = document.createElement('div');
+      label.className = 'set-label';
+      label.textContent = `${si + 1}세트`;
+
+      const balls = document.createElement('div');
+      balls.className = 'balls';
+
+      numbers.forEach((n, bi) => {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'ball-wrapper';
+
+        if (n === null) {
+          const input = document.createElement('input');
+          input.type = 'number';
+          input.className = 'ball-input';
+          input.min = '1';
+          input.max = '45';
+          input.placeholder = '?';
+          input.dataset.set = si;
+          input.dataset.idx = bi;
+          wrapper.appendChild(input);
+        } else {
+          const ball = document.createElement('div');
+          ball.className = `ball ${ballColor(n)}`;
+          ball.textContent = n;
+          wrapper.appendChild(ball);
+
+          const del = document.createElement('button');
+          del.type = 'button';
+          del.className = 'del-btn';
+          del.textContent = '×';
+          del.title = '삭제하고 직접 입력';
+          del.dataset.set = si;
+          del.dataset.idx = bi;
+          wrapper.appendChild(del);
+        }
+
+        balls.appendChild(wrapper);
+      });
+
+      row.appendChild(label);
+      row.appendChild(balls);
+      resultsEl.appendChild(row);
+    });
+  }
+
+  // 삭제 버튼: 클릭 위임
+  resultsEl.addEventListener('click', (e) => {
+    const del = e.target.closest('.del-btn');
+    if (!del) return;
+    const si = parseInt(del.dataset.set, 10);
+    const bi = parseInt(del.dataset.idx, 10);
+    appState.sets[si][bi] = null;
+    renderResults();
+    const newInput = resultsEl.querySelector(`.ball-input[data-set="${si}"][data-idx="${bi}"]`);
+    if (newInput) newInput.focus();
+  });
+
+  // 직접 입력: Enter는 blur를 유발해서 커밋 로직 하나로 처리
+  resultsEl.addEventListener('keydown', (e) => {
+    if (e.target.classList && e.target.classList.contains('ball-input') && e.key === 'Enter') {
+      e.target.blur();
+    }
+  });
+
+  resultsEl.addEventListener('blur', (e) => {
+    if (!e.target.classList || !e.target.classList.contains('ball-input')) return;
+    commitBallEdit(e.target);
+  }, true);
+
+  function commitBallEdit(input) {
+    const si = parseInt(input.dataset.set, 10);
+    const bi = parseInt(input.dataset.idx, 10);
+    const set = appState.sets[si];
+    if (!set) return;
+
+    const raw = input.value.trim();
+    if (raw === '') {
+      // 입력하지 않고 포커스를 벗어나면 빈 칸 그대로 유지
+      return;
+    }
+
+    const n = parseInt(raw, 10);
+    const others = set.filter((v, i) => i !== bi && v !== null);
+
+    if (!Number.isInteger(n) || n < 1 || n > 45 || others.includes(n)) {
+      input.classList.add('shake');
+      input.value = '';
+      setTimeout(() => input.classList.remove('shake'), 300);
+      return;
+    }
+
+    set[bi] = n;
+    set.sort((a, b) => {
+      if (a === null) return 1;
+      if (b === null) return -1;
+      return a - b;
+    });
+    renderResults();
+  }
+</script>
+
+</body>
+</html>
